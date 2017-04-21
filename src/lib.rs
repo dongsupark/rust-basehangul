@@ -277,8 +277,13 @@ impl<Iter: Iterator<Item=u16>> Iterator for Unpacker<Iter> {
 
     fn size_hint(&self) -> (usize, Option<usize>) {
         // nchars * 10 - 9 <= nbits <= nchars * 10
+        // NOTE: lo must be positive, so res_lo doesn't overflow.
         let (lo, hi) = self.iter.size_hint();
-        ((lo * 10 - 9 + 7) / 8, hi.map(|hi| (hi * 10 + 7) / 8))
+        let mut res_lo: usize = 0usize;
+        if lo > 0 {
+            res_lo = (lo * 10 - 9 + 7) / 8;
+        }
+        (res_lo, hi.map(|hi| (hi * 10 + 7) / 8))
     }
 }
 
